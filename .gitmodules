@@ -1,0 +1,3 @@
+[submodule "BastionBox"]
+	path = BastionBox
+	url = https://github.com/snaplabsio/BastionBox.git
