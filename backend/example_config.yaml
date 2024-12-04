@@ -1,6 +1,0 @@
-PROXMOX_HOST: your_host
-PROXMOX_USER: your_user@pam
-PROXMOX_PASSWORD: your_password
-PROXMOX_PORT: 8006
-PROXMOX_NODE: your_node
-JWT_SECRET_KEY: ChangeMe!!!

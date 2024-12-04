@@ -6,8 +6,10 @@ import yaml
 import os.path
 import jwt
 import datetime
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app,supports_credentials=True)
 
 # Check if the config file exists
 if not os.path.exists('config.yaml'):
