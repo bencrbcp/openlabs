@@ -1,3 +1,4 @@
 PyJWT
 flask
 proxmoxer
+flask_cors

@@ -209,5 +209,74 @@ def revert_vm_to_snapshot(vmid):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+# Route to get a list of all users in Proxmox
+@app.route('/users', methods=['GET'])
+@token_required
+def get_users():
+    try:
+        # Get all users from Proxmox
+        users = g.proxmox.access.users.get()
+        return jsonify(users), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+# Route to get detailed information about a specific user in Proxmox
+@app.route('/users/<string:userid>', methods=['GET'])
+@token_required
+def get_user_details(userid):
+    try:
+        # Get detailed information about a specific user
+        user_details = g.proxmox.access.users(userid).get()
+        return jsonify(user_details), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+# Route to get a user's permissions
+@app.route('/users/<string:userid>/permissions', methods=['GET'])
+@token_required
+def get_user_permissions(userid):
+    try:
+        # Fetch permissions for given user
+        permissions = g.proxmox.access.permissions.get(userid=userid)
+        return jsonify(permissions), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+# Route to enable a user
+@app.route('/users/<string:userid>/enable', methods=['POST'])
+@token_required
+def enable_user(userid):
+    try:
+        g.proxmox.access.users(userid).put(enable=1)
+        return jsonify({'message': 'User enabled successfully'}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+# Route to disable a user
+@app.route('/users/<string:userid>/disable', methods=['POST'])
+@token_required
+def disable_user(userid):
+    try:
+        g.proxmox.access.users(userid).put(enable=0)
+        return jsonify({'message': 'User disabled successfully'}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+# Route to add a user to a group
+@app.route('/users/<string:userid>/groups/set', methods=['POST'])
+@token_required
+def set_user_to_groups(userid):
+    try:
+        data = request.get_json()
+        groups = data.get('groups')
+
+        if not groups:
+            return jsonify({'error': 'groups is required'}), 400
+
+        g.proxmox.access.users.put(userid, groups=groups)
+        return jsonify({'message': 'User added to group successfully'}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 if __name__ == '__main__':
     app.run(debug=True)
