@@ -58,8 +58,8 @@ def token_required(f):
 @app.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
-    # TODO: Implement dropdown to choose PAM or PVE
-    proxmox_user = data.get('username') + "@pam"
+    login_method = data.get('method', 'pve')  # Default to 'pve' if not provided
+    proxmox_user = f"{data.get('username')}@{login_method}"
     proxmox_password = data.get('password')
 
     if not proxmox_user or not proxmox_password:
