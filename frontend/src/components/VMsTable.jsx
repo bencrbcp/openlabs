@@ -26,28 +26,37 @@ const VMsTable = ({ vms, onVMAction }) => {
 
   return (
     <Table>
-      <TableHead>
-        <TableRow>
-          <TableCell>Name</TableCell>
-          <TableCell>VM ID</TableCell>
-          <TableCell>Status</TableCell>
-          <TableCell>Actions</TableCell>
-        </TableRow>
-      </TableHead>
-      <TableBody>
-        {vms.map((vm) => (
-          <TableRow key={vm.vmid}>
-            <TableCell>{vm.name}</TableCell>
-            <TableCell>{vm.vmid}</TableCell>
-            <TableCell>{vm.status}</TableCell>
-            <TableCell>
-              <Button onClick={() => handleStop(vm.vmid)}>Stop</Button>
-              <Button onClick={() => handleDelete(vm.vmid)}>Delete</Button>
-            </TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+  <TableHead>
+    <TableRow>
+      <TableCell sx={{ color: 'text.primary' }}>Name</TableCell>
+      <TableCell sx={{ color: 'text.primary' }}>VM ID</TableCell>
+      <TableCell sx={{ color: 'text.primary' }}>Status</TableCell>
+      <TableCell sx={{ color: 'text.primary' }}>Actions</TableCell>
+    </TableRow>
+  </TableHead>
+  <TableBody>
+    {vms.map((vm) => (
+      <TableRow key={vm.vmid} sx={{ backgroundColor: 'background.default' }}>
+        <TableCell sx={{ color: 'text.secondary' }}>{vm.name}</TableCell>
+        <TableCell sx={{ color: 'text.secondary' }}>{vm.vmid}</TableCell>
+        <TableCell sx={{ color: 'text.secondary' }}>{vm.status}</TableCell>
+        <TableCell>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => handleStop(vm.vmid)}
+            sx={{ mr: 1 }}
+          >
+            Stop
+          </Button>
+          <Button variant="contained" color="error" onClick={() => handleDelete(vm.vmid)}>
+            Delete
+          </Button>
+        </TableCell>
+      </TableRow>
+    ))}
+  </TableBody>
+</Table>
   );
 };
 

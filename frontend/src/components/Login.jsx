@@ -26,58 +26,61 @@ const Login = () => {
 
   return (
     <Box
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        height: '100vh', // Full viewport height
-        backgroundImage: `url(${loginBackground})`, // Set background image
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-      }}
-    >
-      <Container
-        maxWidth="xs"
-        sx={{
-          background: 'rgba(255, 255, 255, 0.8)', // Optional: semi-transparent background for form
-          padding: 4,
-          borderRadius: 2,
-        }}
-      >
-        <Box display="flex" alignItems="center" justifyContent="center" mb={1}>
-          <Typography variant="h4" sx={{ mr: 1 }}>
-            OpenLabs
-          </Typography>
-          <img src={logo} alt="Logo" style={{ height: '40px' }} />
-        </Box>
-        <Typography
-          variant="subtitle1"
-          align="center"
-          color="textSecondary"
-          sx={{ mb: 1 }}
-        >
-          Cyber Ranges for everyone
-        </Typography>
-        <TextField
-          label="Proxmox Username"
-          fullWidth
-          margin="normal"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-        />
-        <TextField
-          label="Password"
-          type="password"
-          fullWidth
-          margin="normal"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        <Button variant="contained" color="primary" fullWidth onClick={handleLogin}>
-          Login
-        </Button>
-      </Container>
+  sx={{
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: '100vh',
+    backgroundImage: `url(${loginBackground})`,
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    filter: 'brightness(1)',
+  }}
+>
+  <Container
+    maxWidth="xs"
+    sx={{
+      background: 'rgba(30, 30, 30, 0.9)', // Dark semi-transparent background
+      padding: 4,
+      borderRadius: 2,
+      boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.5)', // Add a shadow for depth
+    }}
+  >
+    <Box display="flex" alignItems="center" justifyContent="center" mb={1}>
+      <Typography variant="h4" sx={{ mr: 1, color: 'primary.main' }}>
+        OpenLabs
+      </Typography>
+      <img src={logo} alt="Logo" style={{ height: '40px' }} />
     </Box>
+    <Typography
+      variant="subtitle1"
+      align="center"
+      sx={{ mb: 1, color: 'text.secondary' }}
+    >
+      Cyber Ranges for everyone
+    </Typography>
+    <TextField
+      label="Proxmox Username"
+      fullWidth
+      margin="normal"
+      value={username}
+      onChange={(e) => setUsername(e.target.value)}
+      sx={{ input: { color: 'white' } }}
+    />
+    <TextField
+      label="Password"
+      type="password"
+      fullWidth
+      margin="normal"
+      value={password}
+      onChange={(e) => setPassword(e.target.value)}
+      sx={{ input: { color: 'white' } }}
+    />
+    <Button variant="contained" color="primary" fullWidth onClick={handleLogin}>
+      Login
+    </Button>
+  </Container>
+</Box>
   );
 };
 

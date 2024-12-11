@@ -77,23 +77,30 @@ def login():
     except Exception as e:
         return jsonify({'error': 'Login failed: ' + str(e)}), 401
 
-# Route to logout
+# route to logout
 @app.route('/logout', methods=['GET'])
 def logout():
+    # Get the custom message from the query parameters (or use a default)
     message = request.args.get('message', 'You have been logged out successfully.')
-    response = make_response(redirect(url_for('login')))
-    response.set_cookie('x-access-token', '', expires=0)
-    response.set_data(jsonify({'message': message}).data)
+    
+    # Clear the session or token
+    response = make_response(jsonify({'message': message}))
+    response.set_cookie('x-access-token', '', expires=0)  # clear the token cookie
+    
+    # Check if there's a token and decode it to remove the session
     token = request.cookies.get('x-access-token')
     if token:
         try:
             data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
             proxmox_user = data['proxmox_user']
-            # Remove the user's Proxmox session from memory
-            proxmox_sessions.pop(proxmox_user, None)
+            proxmox_sessions.pop(proxmox_user, None)  # remove the session
         except jwt.InvalidTokenError:
             pass
+    
+    # Return a 200 OK response with the message
+    response.status_code = 200
     return response
+
 
 # Route to get all active VMs and return as JSON
 @app.route('/vms/active', methods=['GET'])
