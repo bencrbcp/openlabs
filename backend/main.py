@@ -6,10 +6,18 @@ import yaml
 import os.path
 import jwt
 import datetime
+import argparse
 from flask_cors import CORS
+
+# Debug flag to show verbose errors and stuff during development only
+parser = argparse.ArgumentParser(description="Run Flask app with debug mode.")
+parser.add_argument('--debug', action='store_true', help="Run the app in debug mode and show detailed errors.")
+args = parser.parse_args()
+DEBUG = args.debug
 
 app = Flask(__name__)
 CORS(app,supports_credentials=True)
+app.config['DEBUG'] = DEBUG
 
 # Check if the config file exists
 if not os.path.exists('config.yaml'):
@@ -53,6 +61,12 @@ def token_required(f):
             return redirect(url_for('logout', message='Invalid token!'))
         return f(*args, **kwargs)
     return decorated
+    
+# Error handling that respects the debug flag
+def handle_error(e, detailed=DEBUG):
+    """Handles errors based on debug mode."""
+    message = {'error': str(e)} if detailed else {'error': 'An error occurred'}
+    return jsonify(message)
 
 # Route to login and get a token
 @app.route('/login', methods=['POST'])
@@ -76,7 +90,7 @@ def login():
         response.set_cookie('x-access-token', token)
         return response
     except Exception as e:
-        return jsonify({'error': 'Login failed: ' + str(e)}), 401
+        return handle_error(e), 401
 
 # route to logout
 @app.route('/logout', methods=['GET'])
@@ -116,7 +130,7 @@ def get_logged_in_user():
 
         return jsonify({'proxmox_user': proxmox_user}), 200
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return handle_error(e), 500
 
 # Route to get all active VMs and return as JSON
 @app.route('/vms/active', methods=['GET'])
@@ -131,7 +145,7 @@ def get_vms():
         
         return jsonify(active_vms), 200
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return handle_error(e), 500
 
 # Route to create a VM from a template ID, i.e 2001
 @app.route('/vms/create', methods=['POST'])
@@ -160,7 +174,7 @@ def create_vm_with_name():
         
         return jsonify({'message': 'VM created', 'vmid': new_vmid}), 200
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return handle_error(e), 500
 
 # Route to delete a VM by VM ID
 @app.route('/vms/<int:vmid>/delete', methods=['DELETE'])
@@ -171,7 +185,7 @@ def delete_vm(vmid):
         g.proxmox.nodes(PROXMOX_NODE).qemu(vmid).delete()
         return jsonify({'message': 'VM deleted successfully'}), 200
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return handle_error(e), 500
 
 # Route to stop a VM
 @app.route('/vms/<int:vmid>/stop', methods=['POST'])
@@ -181,7 +195,7 @@ def stop_vm(vmid):
         g.proxmox.nodes(PROXMOX_NODE).qemu(vmid).status.shutdown.post()
         return jsonify({'message': 'VM stopped'}), 200
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return handle_error(e), 500
 
 # Route to convert a VM to a template by VM ID
 @app.route('/vms/<int:vmid>/template', methods=['POST'])
@@ -192,7 +206,7 @@ def convert_vm_to_template(vmid):
         g.proxmox.nodes(PROXMOX_NODE).qemu(vmid).template.post()
         return jsonify({'message': 'VM converted to template successfully'}), 200
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return handle_error(e), 500
 
 # Route to create a snapshot for a VM by VM ID
 @app.route('/vms/<int:vmid>/snapshot', methods=['POST'])
@@ -212,7 +226,7 @@ def create_vm_snapshot(vmid):
         )
         return jsonify({'message': 'Snapshot created successfully'}), 200
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return handle_error(e), 500
 
 # Route to revert a VM to a snapshot by VM ID and snapshot name
 @app.route('/vms/<int:vmid>/snapshot/revert', methods=['POST'])
@@ -230,7 +244,7 @@ def revert_vm_to_snapshot(vmid):
         g.proxmox.nodes(PROXMOX_NODE).qemu(vmid).snapshot(snapshot_name).rollback.post()
         return jsonify({'message': 'VM reverted to snapshot successfully'}), 200
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return handle_error(e), 500
 
 # Route to get a list of all users in Proxmox
 @app.route('/users', methods=['GET'])
@@ -241,7 +255,7 @@ def get_users():
         users = g.proxmox.access.users.get()
         return jsonify(users), 200
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return handle_error(e), 500
 
 # Route to get detailed information about a specific user in Proxmox
 @app.route('/users/<string:userid>', methods=['GET'])
@@ -252,7 +266,7 @@ def get_user_details(userid):
         user_details = g.proxmox.access.users(userid).get()
         return jsonify(user_details), 200
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return handle_error(e), 500
 
 # Route to get a user's permissions
 @app.route('/users/<string:userid>/permissions', methods=['GET'])
@@ -263,7 +277,7 @@ def get_user_permissions(userid):
         permissions = g.proxmox.access.permissions.get(userid=userid)
         return jsonify(permissions), 200
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return handle_error(e), 500
 
 # Route to enable a user
 @app.route('/users/<string:userid>/enable', methods=['POST'])
@@ -273,7 +287,7 @@ def enable_user(userid):
         g.proxmox.access.users(userid).put(enable=1)
         return jsonify({'message': 'User enabled successfully'}), 200
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return handle_error(e), 500
 
 # Route to disable a user
 @app.route('/users/<string:userid>/disable', methods=['POST'])
@@ -283,7 +297,7 @@ def disable_user(userid):
         g.proxmox.access.users(userid).put(enable=0)
         return jsonify({'message': 'User disabled successfully'}), 200
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return handle_error(e), 500
 
 # Route to add a user to a group
 @app.route('/users/<string:userid>/groups/set', methods=['POST'])
@@ -299,7 +313,7 @@ def set_user_to_groups(userid):
         g.proxmox.access.users.put(userid, groups=groups)
         return jsonify({'message': 'User added to group successfully'}), 200
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return handle_error(e), 500
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run()
