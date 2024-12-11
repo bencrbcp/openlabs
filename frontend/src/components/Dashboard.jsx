@@ -25,31 +25,33 @@ const Dashboard = () => {
 
   return (
     <Box
-  sx={{
-    height: '100vh',
-    padding: 3,
-    backgroundColor: 'background.default',
-  }}
->
-  <Box display="flex" alignItems="center" mb={3}>
-    <Typography variant="h4" sx={{ mr: 1, color: 'primary.main' }}>
-      Machine Dashboard
-    </Typography>
-    <img src={logo} alt="Logo" style={{ height: '40px' }} />
-  </Box>
-  <Box
-    sx={{
-      maxWidth: '80%',
-      margin: 'auto',
-      padding: 2,
-      backgroundColor: 'background.paper',
-      borderRadius: 2,
-      boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.3)',
-    }}
-  >
-    <VMsTable vms={vms} onVMAction={fetchActiveVMs} />
-  </Box>
-</Box>
+      sx={{
+        minHeight: '100vh',
+        backgroundColor: 'background.default',  // Apply background color to the full screen
+        padding: 3,
+      }}
+    >
+      <Box display="flex" alignItems="center" mb={3}>
+        <Typography variant="h4" sx={{ mr: 1, color: 'primary.main' }}>
+          Machine Dashboard
+        </Typography>
+        <img src={logo} alt="Logo" style={{ height: '40px' }} />
+      </Box>
+      <Box
+        sx={{
+          maxWidth: '80%',
+          margin: 'auto',
+          padding: 0,
+          backgroundColor: 'background.paper',
+          borderRadius: 2,
+          boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.3)',
+          overflowY: 'auto', // Allows scrolling in case of a long table
+          height: 'calc(100vh - 220px)',  // Ensures the table is scrollable if needed
+        }}
+      >
+        <VMsTable vms={vms} onVMAction={fetchActiveVMs} />
+      </Box>
+    </Box>
   );
 };
 

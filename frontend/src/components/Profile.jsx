@@ -39,19 +39,11 @@ const Profile = () => {
     return <Typography>Loading...</Typography>;
   }
 
-  // Helper function to create permission groups for only the '/' path (Main permissions)
   const createPermissionGroups = (permissions) => {
     const groupedPermissions = {};
-
-    // Iterate through each permission and check if it's in the '/' path (Main permissions)
-    if (permissions['/']) {
-      groupedPermissions['Main'] = [];
-      // Add all permissions for the '/' path to the 'Main' group
-      Object.keys(permissions['/']).forEach((permission) => {
-        groupedPermissions['Main'].push(permission);
-      });
-    }
-
+    Object.entries(permissions).forEach(([path, perms]) => {
+      groupedPermissions[path] = Object.entries(perms).map(([key, value]) => ({ name: key, value }));
+    });
     return groupedPermissions;
   };
 
@@ -59,66 +51,78 @@ const Profile = () => {
 
   return (
     <Box
-    sx={{
-      height: '100vh',
-      padding: 3,
-      backgroundColor: 'background.default',
-    }}
-  >
-    <Container sx={{ minHeight: '100vh', padding: 3, backgroundColor: 'background.default' }}>
-      <Paper sx={{ padding: 3, backgroundColor: 'background.paper' }}>
-        <Typography variant="h4" color="text.primary">Profile</Typography>
-        <Box sx={{ marginTop: 2 }}>
-          <Typography variant="h6" color="text.primary">Username: {user.username}</Typography>
-          <Typography variant="h6" color="text.primary">Email: {user.email}</Typography>
-          
-          <Divider sx={{ my: 2 }} />
-          
-          {/* Groups Section */}
-          <Typography variant="h5" color="text.primary" sx={{ marginBottom: 1 }}>Groups</Typography>
-          {user.groups && user.groups.length > 0 ? (
-            <Box sx={{ paddingLeft: 2 }}>
-              {user.groups.map((group, index) => (
-                <Typography key={index} variant="body1" color="text.secondary">
-                  {group}
-                </Typography>
-              ))}
-            </Box>
-          ) : (
-            <Typography color="text.secondary">No groups available</Typography>
-          )}
+      sx={{
+        minHeight: '100vh',
+        padding: 3,
+        backgroundColor: 'background.default',
+        display: 'flex',
+        flexDirection: 'column',
+      }}
+    >
+      <Container sx={{ flexGrow: 1, padding: 3, backgroundColor: 'background.default' }}>
+        <Paper sx={{ padding: 3, backgroundColor: 'background.paper' }}>
+          <Typography variant="h4" color="text.primary">Profile</Typography>
+          <Box sx={{ marginTop: 2 }}>
+            <Typography variant="h6" color="text.primary">Username: {user.username}</Typography>
+            <Typography variant="h6" color="text.primary">Email: {user.email}</Typography>
+            
+            <Divider sx={{ my: 2 }} />
+            
+            {/* Groups Section */}
+            <Typography variant="h5" color="text.primary" sx={{ marginBottom: 1 }}>Groups</Typography>
+            {user.groups && user.groups.length > 0 ? (
+              <Box sx={{ paddingLeft: 2 }}>
+                {user.groups.map((group, index) => (
+                  <Typography key={index} variant="body1" color="text.secondary">
+                    {group}
+                  </Typography>
+                ))}
+              </Box>
+            ) : (
+              <Typography color="text.secondary">No groups available</Typography>
+            )}
 
-          <Divider sx={{ my: 2 }} />
-          
-          {/* Permissions Section */}
-          <Typography variant="h5" color="text.primary" sx={{ marginBottom: 1 }}>Permissions</Typography>
-          {Object.keys(permissionGroups).length > 0 ? (
-            <Box sx={{ paddingLeft: 2 }}>
-              {Object.keys(permissionGroups).map((group, index) => (
-                <Accordion key={index} sx={{ marginBottom: 1 }}>
-                  <AccordionSummary
-                    expandIcon={<ExpandMoreIcon />}
-                    aria-controls={`panel-${group}-content`}
-                    id={`panel-${group}-header`}
-                  >
-                    <Typography variant="h6" color="text.primary">{group} Permissions</Typography>
-                  </AccordionSummary>
-                  <AccordionDetails>
-                    {permissionGroups[group].map((permission, idx) => (
-                      <Typography key={idx} variant="body1" color="text.secondary">
-                        {permission}
-                      </Typography>
+            <Divider sx={{ my: 2 }} />
+            
+            {/* Permissions Section */}
+            <Accordion sx={{ marginBottom: 2 }}>
+              <AccordionSummary
+                expandIcon={<ExpandMoreIcon />}
+                aria-controls="permissions-panel-content"
+                id="permissions-panel-header"
+              >
+                <Typography variant="h5" color="text.primary">Permissions</Typography>
+              </AccordionSummary>
+              <AccordionDetails>
+                {Object.keys(permissionGroups).length > 0 ? (
+                  <Box sx={{ paddingLeft: 2 }}>
+                    {Object.keys(permissionGroups).map((group, index) => (
+                      <Accordion key={index} sx={{ marginBottom: 1 }}>
+                        <AccordionSummary
+                          expandIcon={<ExpandMoreIcon />}
+                          aria-controls={`panel-${group}-content`}
+                          id={`panel-${group}-header`}
+                        >
+                          <Typography variant="h6" color="text.primary">{group}</Typography>
+                        </AccordionSummary>
+                        <AccordionDetails>
+                          {permissionGroups[group].map((permission, idx) => (
+                            <Typography key={idx} variant="body1" color="text.secondary">
+                              {permission.name}: {permission.value}
+                            </Typography>
+                          ))}
+                        </AccordionDetails>
+                      </Accordion>
                     ))}
-                  </AccordionDetails>
-                </Accordion>
-              ))}
-            </Box>
-          ) : (
-            <Typography color="text.secondary">No permissions assigned</Typography>
-          )}
-        </Box>
-      </Paper>
-    </Container>
+                  </Box>
+                ) : (
+                  <Typography color="text.secondary">No permissions assigned</Typography>
+                )}
+              </AccordionDetails>
+            </Accordion>
+          </Box>
+        </Paper>
+      </Container>
     </Box>
   );
 };
