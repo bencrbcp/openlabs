@@ -102,6 +102,21 @@ def logout():
     response.status_code = 200
     return response
 
+# Route to get the logged-in user's Proxmox username
+@app.route('/user', methods=['GET'])
+@token_required
+def get_logged_in_user():
+    try:
+        # Retrieve the Proxmox username from the JWT token
+        proxmox_user = jwt.decode(
+            request.cookies.get('x-access-token'),
+            app.config['SECRET_KEY'],
+            algorithms=['HS256']
+        )['proxmox_user']
+
+        return jsonify({'proxmox_user': proxmox_user}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 # Route to get all active VMs and return as JSON
 @app.route('/vms/active', methods=['GET'])
