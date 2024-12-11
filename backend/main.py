@@ -81,6 +81,7 @@ def login():
 
     try:
         # Verify credentials by initializing Proxmox API
+        print(proxmox_user)
         proxmox = ProxmoxAPI(PROXMOX_HOST, user=proxmox_user, password=proxmox_password, verify_ssl=False, port=int(PROXMOX_PORT))
         # Store the Proxmox instance in memory for this user
         proxmox_sessions[proxmox_user] = proxmox

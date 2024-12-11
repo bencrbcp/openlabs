@@ -5,31 +5,43 @@ import { API_BASE_URL } from '../config';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 const Profile = () => {
+  const [proxmoxUsername, setProxmoxUsername] = useState(null);
   const [user, setUser] = useState(null);
   const [permissions, setPermissions] = useState({});
   const [error, setError] = useState(null);
+    
+  // get the username from localStorage
+  const storedUsername = localStorage.getItem('username');
 
   useEffect(() => {
-    // Fetch the user details for the profile page
-    axios.get(`${API_BASE_URL}/users/root@pam`)
-      .then((response) => {
-        setUser(response.data);
-      })
-      .catch((error) => {
-        console.error("Error fetching user profile:", error);
-        setError("Failed to load user data");
-      });
-
-    // Fetch the user's permissions
-    axios.get(`${API_BASE_URL}/users/root@pam/permissions`)
-      .then((response) => {
-        setPermissions(response.data);
-      })
-      .catch((error) => {
-        console.error("Error fetching user permissions:", error);
-        setError("Failed to load user permissions");
-      });
-  }, []);
+    if (storedUsername) {
+      setProxmoxUsername(storedUsername); 
+    }
+  }, [storedUsername]);
+    
+  useEffect(() => {
+    if (proxmoxUsername) {
+      // Fetch the user details for the profile page
+      axios.get(`${API_BASE_URL}/users/${proxmoxUsername}`)
+        .then((response) => {
+          setUser(response.data);
+        })
+        .catch((error) => {
+          console.error("Error fetching user profile:", error);
+          setError("Failed to load user data");
+        });
+  
+      // Fetch the user's permissions
+      axios.get(`${API_BASE_URL}/users/${proxmoxUsername}/permissions`)
+        .then((response) => {
+          setPermissions(response.data);
+        })
+        .catch((error) => {
+          console.error("Error fetching user permissions:", error);
+          setError("Failed to load user permissions");
+        });
+    }
+  }, [proxmoxUsername])
 
   if (error) {
     return <Typography color="error">{error}</Typography>;
@@ -63,7 +75,7 @@ const Profile = () => {
         <Paper sx={{ padding: 3, backgroundColor: 'background.paper' }}>
           <Typography variant="h4" color="text.primary">Profile</Typography>
           <Box sx={{ marginTop: 2 }}>
-            <Typography variant="h6" color="text.primary">Username: {user.username}</Typography>
+            <Typography variant="h6" color="text.primary">Username: {proxmoxUsername}</Typography>
             <Typography variant="h6" color="text.primary">Email: {user.email}</Typography>
             
             <Divider sx={{ my: 2 }} />
