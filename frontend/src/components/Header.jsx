@@ -62,22 +62,33 @@ const Header = () => {
   };
 
   const handleDashboard = () => {
-    navigate('/dashboard'); // Navigate to the dashboard
+    navigate('/dashboard');
   };
 
   const handleCreateVM = () => {
-    navigate('/create-vm'); // Navigate to the create VM page
+    navigate('/create-vm'); 
+  };
+  
+  const handleCreateNetwork = () => {
+    navigate('/create-network'); 
+  };
+
+  const handleManageNetworks = () => {
+    navigate('/manage-networks'); 
   };
 
   return (
     <AppBar position="static">
       <Toolbar>
-        <Typography variant="h6" sx={{ flexGrow: 1 }}>
+        <Typography variant="h4" sx={{ flexGrow: 1 }}>
           OpenLabs
         </Typography>
         {/* Add Dashboard and Create VM buttons */}
         <Button color="inherit" onClick={handleDashboard}>Dashboard</Button>
         <Button color="inherit" onClick={handleCreateVM}>Create VM</Button>
+        <Button color="inherit" onClick={handleCreateNetwork}>Create Network</Button>
+        <Button color="inherit" onClick={handleManageNetworks}>Manage Networks</Button>
+
         
         {user && (
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
