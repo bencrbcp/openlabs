@@ -59,7 +59,7 @@ def token_required(f):
 def login():
     data = request.get_json()
     # TODO: Implement dropdown to choose PAM or PVE
-    proxmox_user = data.get('username') + "@pve"
+    proxmox_user = data.get('username') + "@pam"
     proxmox_password = data.get('password')
 
     if not proxmox_user or not proxmox_password:
