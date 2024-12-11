@@ -298,6 +298,16 @@ def disable_user(userid):
         return jsonify({'message': 'User disabled successfully'}), 200
     except Exception as e:
         return handle_error(e), 500
+        
+# Route to delete a user
+@app.route('/users/<string:userid>', methods=['DELETE'])
+@token_required
+def delete_user(userid):
+    try:
+        g.proxmox.access.users(userid).delete()
+        return jsonify({'message': 'User deleted successfully'}), 200
+    except Exception as e:
+        return handle_error(e), 500
 
 # Route to add a user to a group
 @app.route('/users/<string:userid>/groups/set', methods=['POST'])
