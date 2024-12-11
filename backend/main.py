@@ -308,6 +308,48 @@ def delete_user(userid):
         return jsonify({'message': 'User deleted successfully'}), 200
     except Exception as e:
         return handle_error(e), 500
+        
+# Route to create a new user
+@app.route('/users/create', methods=['POST'])
+@token_required
+def create_user():
+    try:
+        # Get the data from the request
+        data = request.get_json()
+        username = data.get('username')
+        password = data.get('password')
+        confirmPassword = data.get('confirmPassword')
+        email = data.get('email')
+        firstname = data.get('firstname')
+        lastname = data.get('lastname')
+        group = data.get('group', '')  # Optional, defaults to an empty string
+        comment = data.get('comment', '')  # Optional, user comment or description
+
+        if not username or not password or not email or not firstname or not lastname:
+            return jsonify({'error': 'Username, password, email, firstname, and lastname are required'}), 400
+            
+        if password != confirmPassword:
+            return jsonify({'error': 'Passwords do not match!'}), 400
+
+        # Ensure the username includes the realm (e.g., `username@pve`)
+        if '@' not in username:
+            username += '@pve'
+
+        # Create the user in Proxmox
+        g.proxmox.access.users.post(
+            userid=username,
+            password=password,
+            email=email,
+            groups=group,
+            comment=comment,
+            firstname=firstname,
+            lastname=lastname,
+            enable=1  # Enable the user by default
+        )
+
+        return jsonify({'message': f'User {username} created successfully'}), 201
+    except Exception as e:
+        return handle_error(e), 500
 
 # Route to add a user to a group
 @app.route('/users/<string:userid>/groups/set', methods=['POST'])
