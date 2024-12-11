@@ -81,7 +81,7 @@ def login():
 
     try:
         # Verify credentials by initializing Proxmox API
-        print(proxmox_user)
+        #print(proxmox_user)
         proxmox = ProxmoxAPI(PROXMOX_HOST, user=proxmox_user, password=proxmox_password, verify_ssl=False, port=int(PROXMOX_PORT))
         # Store the Proxmox instance in memory for this user
         proxmox_sessions[proxmox_user] = proxmox
@@ -365,6 +365,120 @@ def set_user_to_groups(userid):
 
         g.proxmox.access.users.put(userid, groups=groups)
         return jsonify({'message': 'User added to group successfully'}), 200
+    except Exception as e:
+        return handle_error(e), 500
+
+### POOL STUFF
+# Route to list existing pools
+@app.route('/pools', methods=['GET'])
+@token_required
+def list_pools():
+    try:
+        # Retrieve all pools from Proxmox
+        pools = g.proxmox.pools.get()
+        return jsonify(pools), 200
+    except Exception as e:
+        return handle_error(e), 500
+        
+# Route to add a new pool
+@app.route('/pools/add', methods=['POST'])
+@token_required
+def add_pool():
+    try:
+        # Get the data from the request
+        data = request.get_json()
+        poolid = data.get('poolid')
+        comment = data.get('comment', '')  # Optional comment
+
+        if not poolid:
+            return jsonify({'error': 'Pool ID is required'}), 400
+
+        # Create the pool in Proxmox
+        g.proxmox.pools.post(
+            poolid=poolid,
+            comment=comment
+        )
+
+        return jsonify({'message': f'Pool {poolid} created successfully'}), 201
+    except Exception as e:
+        return handle_error(e), 500
+
+# Route to get info about a specific pool
+@app.route('/pools/<string:poolid>', methods=['GET'])
+@token_required
+def get_pool_info(poolid):
+    try:
+        if not poolid:
+            return jsonify({'error': 'Pool ID is required'}), 400
+
+        # Retrieve the specific pool's information
+        pool_info = g.proxmox.pools(poolid).get()
+
+        return jsonify(pool_info), 200
+    except Exception as e:
+        return handle_error(e), 500
+
+# Route to delete a pool
+@app.route('/pools/<string:poolid>', methods=['DELETE'])
+@token_required
+def delete_pool(poolid):
+    try:
+        if not poolid:
+            return jsonify({'error': 'Pool ID is required'}), 400
+
+        # Delete the pool in Proxmox
+        g.proxmox.pools(poolid).delete()
+
+        return jsonify({'message': f'Pool {poolid} deleted successfully'}), 200
+    except Exception as e:
+        return handle_error(e), 500
+
+# Route to add VMs to a pool
+@app.route('/pools/<string:poolid>/add-vms', methods=['PUT'])
+@token_required
+def add_vms_to_pool(poolid):
+    try:
+        # Get the data from the request
+        data = request.get_json()
+        vms = data.get('vms')
+
+        if not vms or not isinstance(vms, list):
+            return jsonify({'error': 'VMs must be provided as a list'}), 400
+
+        if not poolid:
+            return jsonify({'error': 'Pool ID is required'}), 400
+
+        # Add the VMs to the specified pool
+        g.proxmox.pools(poolid).put(
+            vms=vms
+        )
+
+        return jsonify({'message': f'VMs successfully added to pool {poolid}'}), 200
+    except Exception as e:
+        return handle_error(e), 500
+
+# Route to delete VMs from a pool
+@app.route('/pools/<string:poolid>/remove-vms', methods=['PUT'])
+@token_required
+def remove_vms_from_pool(poolid):
+    try:
+        # Get the data from the request
+        data = request.get_json()
+        vms = data.get('vms')
+
+        if not vms or not isinstance(vms, list):
+            return jsonify({'error': 'VMs must be provided as a list'}), 400
+
+        if not poolid:
+            return jsonify({'error': 'Pool ID is required'}), 400
+
+        # Remove the VMs from the specified pool
+        g.proxmox.pools(poolid).put(
+            vms=vms,
+            delete=1  # Indicate that the VMs should be removed
+        )
+
+        return jsonify({'message': f'VMs successfully removed from pool {poolid}'}), 200
     except Exception as e:
         return handle_error(e), 500
 
