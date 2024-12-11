@@ -157,6 +157,7 @@ def create_vm_with_name():
         data = request.get_json()
         template_vmid = data.get('template_vmid')
         new_vm_name = data.get('name')
+        full = data.get('full', 1)      # Full clone or not, default 1 for now
         
         if not template_vmid or not new_vm_name:
             return jsonify({'error': 'Template VM ID and new VM name are required'}), 400
@@ -167,13 +168,29 @@ def create_vm_with_name():
         new_vmid = max(used_vmids) + 1 if used_vmids else 100
         
         # Clone the template VM with the provided name
-        g.proxmox.nodes(PROXMOX_NODE).qemu(template_vmid).clone.create(
+        created = g.proxmox.nodes(PROXMOX_NODE).qemu(template_vmid).clone.create(
             newid=new_vmid,  # Assign a new unique ID
             name=new_vm_name,  # New VM name
-            full=1  # Perform a full clone
+            full=full
         )
         
-        return jsonify({'message': 'VM created', 'vmid': new_vmid}), 200
+        return jsonify({'message': 'VM created', 'vmid': new_vmid, 'info': created}), 200
+    except Exception as e:
+        return handle_error(e), 500
+        
+# Route to check the status of a VM being cloned
+@app.route('/vms/clone-status/<string:taskid>', methods=['GET'])
+@token_required
+def check_clone_status(taskid):
+    try:
+        if not taskid:
+            return jsonify({'error': 'Task ID is required'}), 400
+
+        # Fetch the task status using the task ID
+        task_status = g.proxmox.nodes(PROXMOX_NODE).tasks(taskid).status.get()
+        task_status["output_log"] = g.proxmox.nodes(PROXMOX_NODE).tasks(taskid).log.get()
+
+        return jsonify(task_status), 200
     except Exception as e:
         return handle_error(e), 500
 
