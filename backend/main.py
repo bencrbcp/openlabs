@@ -178,7 +178,7 @@ def create_vm_with_name():
     except Exception as e:
         return handle_error(e), 500
         
-# Route to check the status of a VM being cloned
+# Route to check the status of a VM being cloned, including % complete
 @app.route('/vms/clone-status/<string:taskid>', methods=['GET'])
 @token_required
 def check_clone_status(taskid):
@@ -186,9 +186,25 @@ def check_clone_status(taskid):
         if not taskid:
             return jsonify({'error': 'Task ID is required'}), 400
 
-        # Fetch the task status using the task ID
+        # Fetch the task status
         task_status = g.proxmox.nodes(PROXMOX_NODE).tasks(taskid).status.get()
-        task_status["output_log"] = g.proxmox.nodes(PROXMOX_NODE).tasks(taskid).log.get()
+
+        # Fetch the task log
+        output_log = g.proxmox.nodes(PROXMOX_NODE).tasks(taskid).log.get()
+
+        # Extract the last percentage from the log if available
+        percentage_complete = None
+        for log_entry in reversed(output_log):
+            if "transferred" in log_entry.get("t", ""):
+                # Extract percentage using string splitting and cleanup
+                log_text = log_entry.get("t")
+                if "(" in log_text and "%" in log_text:
+                    percentage_text = log_text.split("(")[-1].split("%")[0]
+                    percentage_complete = float(percentage_text)
+                    break
+
+        # Add the percentage to the task status response
+        task_status['percentage_complete'] = percentage_complete if percentage_complete is not None else 0.0
 
         return jsonify(task_status), 200
     except Exception as e:
