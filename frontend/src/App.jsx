@@ -8,21 +8,12 @@ import Header from './components/Header';
 import Profile from './components/Profile';
 import { ThemeProvider } from '@mui/material/styles';
 import theme from './theme';
+import CreateNetworkPage from './components/CreateNetworkPage';
+import ManageNetworks from './components/ManageNetworks';
+import ManageNetworkDetail from './components/ManageNetworkDetail';
+import NetworkManagerTabs from './components/NetworkManagerTabs';
 
 axios.defaults.withCredentials = true;
-
-// const App = () => {
-//   return (
-//     <ThemeProvider theme={theme}>
-//     <Router>
-//       <Routes>
-//         <Route path="/" element={<Login />} />
-//         <Route path="/dashboard" element={<Dashboard />} />
-//       </Routes>
-//     </Router>
-//   </ThemeProvider>
-//   );
-// };
 
 const App = () => {
   return (
@@ -54,6 +45,33 @@ const App = () => {
               <>
                 <Header />
                 <CreateVMPage />
+              </>
+            }
+          />
+          <Route
+            path="/create-network"
+            element={
+              <>
+                <Header />
+                <CreateNetworkPage />
+              </>
+            }
+          />
+          <Route
+            path="/manage-networks"
+            element={
+              <>
+                <Header />
+                <ManageNetworks />
+              </>
+            }
+          />
+          <Route
+            path="/manage-networks/:poolid/*"
+            element={
+              <>
+                <Header />
+                <ManageNetworkDetail />
               </>
             }
           />
